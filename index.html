@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoPrompt - Générateur de Prompts pour Géomatique Énergétique</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #2ecc71;
+            --light: #ecf0f1;
+            --dark: #34495e;
+            --accent: #9b59b6;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        header {
+            grid-column: 1 / -1;
+            background-color: var(--primary);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .logo-image {
+            height: 60px;
+            margin-right: 15px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .options-panel {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            height: 700px;
+            overflow-y: auto;
+        }
+        
+        .result-panel {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 700px;
+        }
+        
+        .section {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        
+        .section h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        select, input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+        }
+        
+        button {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button.copy-btn {
+            background-color: var(--success);
+            margin-top: 10px;
+        }
+        
+        button.copy-btn:hover {
+            background-color: #27ae60;
+        }
+        
+        #promptResult {
+            flex-grow: 1;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            background-color: #f8f9fa;
+            overflow-y: auto;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            padding: 10px 15px;
+            background-color: #eee;
+            cursor: pointer;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .checkbox-group {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .logo-image {
+                height: 40px;
+            }
+            
+            header h1 {
+                font-size: 1.8rem;
+            }
+        }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--success);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .status-message {
+            grid-column: 1 / -1;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            text-align: center;
+            display: none;
+        }
+        
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .wide-modal {
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .primary-btn {
+            background-color: var(--secondary);
+        }
+        
+        .danger-btn {
+            background-color: var(--danger);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .danger-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        /* Saved prompts and history */
+        .saved-prompts-list, .history-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        
+        .prompt-card, .history-item {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            position: relative;
+        }
+        
+        .prompt-card h4 {
+            margin-bottom: 5px;
+            padding-right: 30px;
+        }
+        
+        .prompt-card .date, .history-item .date {
+            color: #777;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .prompt-card .note {
+            background-color: #fff8dc;
+            padding: 8px;
+            border-left: 3px solid #f0e68c;
+            margin: 10px 0;
+            font-style: italic;
+        }
+        
+        .prompt-card .prompt-text, .history-item .prompt-text {
+            max-height: 100px;
+            overflow-y: auto;
+            margin: 10px 0;
+            padding: 8px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        
+        .prompt-card .card-actions, .history-item .card-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            gap: 10px;
+        }
+        
+        .prompt-card .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0;
+        }
+        
+        .card-btn {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        
+        .counter {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+            color: var(--warning);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <img src="geoprompt-logo.png" alt="GeoPrompt Logo" class="logo-image">
+                <h1>GeoPrompt</h1>
+            </div>
+            <p>Générateur de prompts optimisés pour la géomatique et la cartographie énergétique</p>
+        </header>
+        
+        <div id="statusMessage" class="status-message"></div>
+        
+        <div class="options-panel">
+            <div class="section">
+                <h3>Structure de base</h3>
+                <div class="form-group">
+                    <label for="role">Rôle/Expertise</label>
+                    <select id="role"></select>
+                </div>
+                <div class="form-group" id="customRoleGroup" style="display: none;">
+                    <label for="customRole">Rôle personnalisé</label>
+                    <input type="text" id="customRole" placeholder="Entrez un rôle personnalisé...">
+                </div>
+                
+                <div class="form-group">
+                    <label for="taskType">Type de tâche</label>
+                    <select id="taskType"></select>
+                </div>
+                <div class="form-group" id="customTaskGroup" style="display: none;">
+                    <label for="customTask">Tâche personnalisée</label>
+                    <input type="text" id="customTask" placeholder="Entrez une tâche personnalisée...">
+                </div>
+                
+                <div class="form-group">
+                    <label for="taskDescription">Description de la tâche</label>
+                    <textarea id="taskDescription" rows="3" placeholder="Décrivez précisément la tâche à accomplir..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fileType">Fichier associé</label>
+                    <select id="fileType"></select>
+                </div>
+                
+                <div class="form-group" id="customFileTypeGroup" style="display: none;">
+                    <label for="customFileType">Type de fichier personnalisé</label>
+                    <input type="text" id="customFileType" placeholder="Précisez le type de fichier...">
+                </div>
+                
+                <div class="form-group">
+                    <label for="fileDescription">Description du fichier (optionnel)</label>
+                    <textarea id="fileDescription" rows="2" placeholder="Décrivez brièvement le contenu/structure du fichier..."></textarea>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>Instructions méta</h3>
+                
+                <div class="tabs" id="metaTabs">
+                    <!-- Les onglets seront générés dynamiquement -->
+                </div>
+                
+                <div id="metaTabContents">
+                    <!-- Les contenus des onglets seront générés dynamiquement -->
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>Outils techniques spécifiques</h3>
+                <div class="checkbox-group" id="toolsGroup">
+                    <!-- Les outils seront générés dynamiquement -->
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>Modulation de la réponse</h3>
+                
+                <div class="form-group">
+                    <label for="detailLevel">Niveau de détail</label>
+                    <select id="detailLevel"></select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="responseFormat">Format de la réponse</label>
+                    <select id="responseFormat"></select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="audience">Audience cible</label>
+                    <select id="audience"></select>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>Techniques avancées</h3>
+                <div class="checkbox-group" id="advancedGroup">
+                    <!-- Les techniques avancées seront générées dynamiquement -->
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>Exemples pour le prompt</h3>
+                <div class="form-group">
+                    <label for="exampleType">Type d'exemple</label>
+                    <select id="exampleType">
+                        <option value="">Pas d'exemple</option>
+                        <option value="input-output">Exemple d'entrée-sortie</option>
+                        <option value="approach">Exemple d'approche</option>
+                        <option value="code">Exemple de code</option>
+                        <option value="data">Exemple de données</option>
+                        <option value="custom">Autre type d'exemple</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="exampleInputGroup" style="display: none;">
+                    <label for="exampleInput">Entrée de l'exemple</label>
+                    <textarea id="exampleInput" rows="3" placeholder="Entrez l'entrée de votre exemple..."></textarea>
+                </div>
+                
+                <div class="form-group" id="exampleOutputGroup" style="display: none;">
+                    <label for="exampleOutput">Sortie de l'exemple</label>
+                    <textarea id="exampleOutput" rows="3" placeholder="Entrez la sortie attendue..."></textarea>
+                </div>
+                
+                <div class="form-group" id="exampleDescriptionGroup" style="display: none;">
+                    <label for="exampleDescription">Description de l'exemple</label>
+                    <textarea id="exampleDescription" rows="3" placeholder="Décrivez ce que montre cet exemple..."></textarea>
+                </div>
+            </div>
+            
+            <button id="generateBtn">Générer le prompt</button>
+        </div>
+        
+        <div class="result-panel">
+            <h3>Prompt généré</h3>
+            <div id="promptResult"></div>
+            <div style="display: flex; gap: 10px;">
+                <button id="copyBtn" class="copy-btn">Copier le prompt</button>
+                <button id="saveBtn" class="copy-btn" style="background-color: var(--accent);">Sauvegarder</button>
+                <button id="showSavedBtn" class="copy-btn" style="background-color: var(--accent);">Templates</button>
+                <button id="showHistoryBtn" class="copy-btn" style="background-color: var(--warning);">Historique <span id="historyCounter" class="counter">0</span></button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="toast" class="toast">Prompt copié dans le presse-papier!</div>
+    
+    <!-- Modals seront générées dynamiquement par JavaScript -->
+    
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
