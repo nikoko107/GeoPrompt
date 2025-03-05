@@ -1,4 +1,4 @@
-# Générateur de Prompts pour Géomatique Énergétique
+# Générateur de Prompts pour Géomatique
 
 Un outil web permettant de construire des prompts optimisés pour les modèles de langage (LLM) dans le domaine de la géomatique et la cartographie pour le secteur de l'énergie.
 
