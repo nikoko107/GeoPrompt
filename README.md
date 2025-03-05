@@ -108,4 +108,4 @@ Ce projet est sous licence MIT. Voir le fichier LICENSE pour plus de détails.
 
 ---
 
-Créé avec ❤️ pour la communauté des experts en géomatique énergétique.
+Créé avec ❤️ pour la communauté des experts en géomatique .
