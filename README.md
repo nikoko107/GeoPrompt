@@ -2,7 +2,8 @@
 
 Un outil web permettant de construire des prompts optimisés pour les modèles de langage (LLM) dans le domaine de la géomatique et la cartographie pour le secteur de l'énergie.
 
-![image](https://github.com/user-attachments/assets/408cba75-9198-4841-a310-cdb6996de388)
+![image](https://github.com/user-attachments/assets/44bf2787-eca9-4e77-bdb7-baf5479c89c3)
+
 
 
 ## 📋 Présentation
