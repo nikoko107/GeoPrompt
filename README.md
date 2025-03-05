@@ -29,7 +29,7 @@ L'application permet de combiner différentes "briques" d'instructions pour obte
 ### Installation simple
 
 1. Téléchargez ou clonez ce dépôt
-2. Placez les trois fichiers (`index.html`, `config.js`, `app.js`) dans un même dossier
+2. Placez les quatre fichiers (`index.html`, `config.js`, `app.js` , geoprompt-logo.png ) dans un même dossier
 3. Ouvrez le fichier `index.html` dans votre navigateur
 
 Aucune installation de serveur n'est nécessaire, l'application fonctionne entièrement côté client.
